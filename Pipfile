@@ -11,6 +11,7 @@ pandas = "*"
 numpy = "*"
 matplotlib = "*"
 tqdm = "*"
+anytree = "*"
 
 [dev-packages]
 
