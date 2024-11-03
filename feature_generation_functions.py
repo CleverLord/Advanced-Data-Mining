@@ -15,12 +15,12 @@ def rename_columns(df: pd.DataFrame, col_old_name: str, col_new_name: str) -> pd
     return df.copy()
 
 
-def remove_empty_description(df: pd.DataFrame, col_name: str = 'Temat Pracy') -> pd.DataFrame:
+def remove_empty_description(df: pd.DataFrame, col_name: str = 'Temat Pracy', len_of_sentence = 50) -> pd.DataFrame:
     """
     Remove rows with empty description
     """
     df = df[df[col_name].notnull()]
-    df = df[df[col_name].str.len() > 1]
+    df = df[df[col_name].str.len() > len_of_sentence]
     return df
 
 
@@ -92,4 +92,23 @@ def lematize_column(df: pd.DataFrame, nlp, col_name: str = 'Opis Pracy') -> pd.D
     df[col_name] = df[col_name].apply(lambda row: ' '.join(row))
 
     df[col_name] = df[col_name].apply(lambda row: [token.lemma_ for token in nlp(row)])
+    return df
+
+
+def full_feature_generation(df: pd.DataFrame, nlp, col_name: str = "description",
+                            token_col: str = "tokens") -> pd.DataFrame:
+    """
+    Full feature generation pipeline, before using this fun you should rename the columns and drop rows you dont want
+    :param df:
+    :param nlp:
+    :param col_name:
+    :return:
+    """
+    df = tokenize_column(df, nlp, col_name, token_col)
+    df = remove_stop_words(df, nlp, token_col)
+    df = lower_all_letters(df, token_col)
+    df = remove_punctuation(df, nlp, token_col)
+    df = remove_special_characters(df, token_col)
+    df = lematize_column(df, nlp, token_col)
+
     return df
